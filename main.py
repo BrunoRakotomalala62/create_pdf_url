@@ -178,6 +178,42 @@ def index():
         "note": "This API converts Papermark document images into a downloadable PDF."
     })
 
+@app.route('/recherche')
+def recherche_pdf():
+    search_term = request.args.get('pdf', '')
+    
+    if not search_term:
+        return jsonify({"error": "Missing 'pdf' parameter"}), 400
+    
+    try:
+        with open('cache_url_json.json', 'r', encoding='utf-8') as f:
+            cache_data = json.load(f)
+    except FileNotFoundError:
+        return jsonify({"error": "Cache file not found"}), 500
+    
+    results = []
+    for pdf_entry in cache_data.get('pdfs', []):
+        if search_term.lower() in pdf_entry.get('nom', '').lower():
+            url_papermark = pdf_entry.get('url_papermark', '')
+            
+            from urllib.parse import quote
+            base_url = request.host_url.rstrip('/')
+            email = 'monsieurbruno0@gmail.com'
+            download_url = f"{base_url}/download?pdf={quote(url_papermark, safe='')}&email={quote(email, safe='')}"
+            
+            results.append({
+                "titre": pdf_entry.get('nom'),
+                "url_telechargement": download_url
+            })
+    
+    if not results:
+        return jsonify({"error": f"No PDF found matching '{search_term}'"}), 404
+    
+    if len(results) == 1:
+        return jsonify(results[0])
+    
+    return jsonify({"resultats": results})
+
 @app.route('/info')
 def pdf_info():
     pdf_url = request.args.get('pdf')
