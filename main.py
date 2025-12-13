@@ -11,6 +11,12 @@ import os
 
 app = Flask(__name__)
 
+def get_chromium_path():
+    nix_path = '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium'
+    if os.path.exists(nix_path):
+        return nix_path
+    return None
+
 def download_image(url, headers):
     """Download an image from URL"""
     try:
@@ -54,11 +60,15 @@ def get_pdf_from_papermark(url, email="user@download.com"):
     
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=True,
-                executable_path='/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
-                args=['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage']
-            )
+            chromium_path = get_chromium_path()
+            launch_args = {
+                'headless': True,
+                'args': ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage']
+            }
+            if chromium_path:
+                launch_args['executable_path'] = chromium_path
+            
+            browser = p.chromium.launch(**launch_args)
             context = browser.new_context(
                 user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             )
@@ -229,11 +239,15 @@ def pdf_info():
     
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=True,
-                executable_path='/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
-                args=['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage']
-            )
+            chromium_path = get_chromium_path()
+            launch_args = {
+                'headless': True,
+                'args': ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage']
+            }
+            if chromium_path:
+                launch_args['executable_path'] = chromium_path
+            
+            browser = p.chromium.launch(**launch_args)
             context = browser.new_context(
                 user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             )
