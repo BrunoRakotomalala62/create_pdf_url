@@ -155,15 +155,86 @@ def get_pdf_from_papermark(url, email="user@download.com"):
 def index():
     return jsonify({
         "message": "PDF Download API for Papermark",
-        "usage": "GET /download?pdf=<papermark_url>&email=<your_email>",
-        "example": "/download?pdf=https://www.papermark.com/view/cmj45iz65000el804x9fkmzg7&email=user@example.com",
+        "endpoints": {
+            "/info": {
+                "method": "GET",
+                "description": "Get PDF name and dynamic download URL",
+                "parameters": {
+                    "pdf": "Papermark URL (required)",
+                    "email": "Your email (optional, default: monsieurbruno0@gmail.com)"
+                },
+                "example": "/info?pdf=https://www.papermark.com/view/cmj45iz65000el804x9fkmzg7"
+            },
+            "/download": {
+                "method": "GET",
+                "description": "Download the PDF directly",
+                "parameters": {
+                    "pdf": "Papermark URL (required)",
+                    "email": "Your email (optional)"
+                },
+                "example": "/download?pdf=https://www.papermark.com/view/cmj45iz65000el804x9fkmzg7&email=user@example.com"
+            }
+        },
         "note": "This API converts Papermark document images into a downloadable PDF."
+    })
+
+@app.route('/info')
+def pdf_info():
+    pdf_url = request.args.get('pdf')
+    email = request.args.get('email', 'monsieurbruno0@gmail.com')
+    
+    if not pdf_url:
+        return jsonify({"error": "Missing 'pdf' parameter"}), 400
+    
+    if 'papermark.com' not in pdf_url:
+        return jsonify({"error": "URL must be from papermark.com"}), 400
+    
+    document_name = "document"
+    
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                executable_path='/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
+                args=['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage']
+            )
+            context = browser.new_context(
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            )
+            page = context.new_page()
+            
+            page.goto(pdf_url, wait_until='networkidle', timeout=45000)
+            page.wait_for_timeout(2000)
+            
+            next_data = page.query_selector('#__NEXT_DATA__')
+            if next_data:
+                try:
+                    data = json.loads(next_data.inner_text())
+                    doc_name = data.get('props', {}).get('pageProps', {}).get('linkData', {}).get('link', {}).get('document', {}).get('name', '')
+                    if doc_name:
+                        document_name = doc_name.replace('.pdf', '')
+                except:
+                    pass
+            
+            browser.close()
+    except Exception as e:
+        return jsonify({"error": f"Error: {str(e)}"}), 500
+    
+    from urllib.parse import quote
+    base_url = request.host_url.rstrip('/')
+    download_url = f"{base_url}/download?pdf={quote(pdf_url, safe='')}&email={quote(email, safe='')}"
+    
+    return jsonify({
+        "pdf_name": document_name,
+        "filename": f"{document_name}.pdf",
+        "download_url": download_url,
+        "papermark_url": pdf_url
     })
 
 @app.route('/download')
 def download_pdf():
     pdf_url = request.args.get('pdf')
-    email = request.args.get('email', 'user@download.com')
+    email = request.args.get('email', 'monsieurbruno0@gmail.com')
     
     if not pdf_url:
         return jsonify({"error": "Missing 'pdf' parameter"}), 400
