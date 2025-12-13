@@ -5,9 +5,4 @@ gunicorn
 playwright
 img2pdf
 pillow
-beautifulsoup4
-flask
-gunicorn
-img2pdf
-playwright
-requests
+setuptools

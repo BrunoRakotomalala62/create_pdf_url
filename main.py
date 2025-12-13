@@ -12,9 +12,22 @@ import os
 app = Flask(__name__)
 
 def get_chromium_path():
-    nix_path = '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium'
-    if os.path.exists(nix_path):
-        return nix_path
+    possible_paths = [
+        '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
+        '/usr/bin/chromium',
+        '/usr/bin/chromium-browser',
+        '/usr/bin/google-chrome',
+        '/opt/render/.cache/ms-playwright/chromium-*/chrome-linux/chrome',
+    ]
+    
+    import glob
+    for path in possible_paths:
+        if '*' in path:
+            matches = glob.glob(path)
+            if matches:
+                return matches[0]
+        elif os.path.exists(path):
+            return path
     return None
 
 def download_image(url, headers):
