@@ -2,7 +2,6 @@ flask
 requests
 beautifulsoup4
 gunicorn
-beautifulsoup4
-flask
-gunicorn
-requests
+playwright
+img2pdf
+pillow
