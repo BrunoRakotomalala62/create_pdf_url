@@ -225,10 +225,8 @@ def pdf_info():
     download_url = f"{base_url}/download?pdf={quote(pdf_url, safe='')}&email={quote(email, safe='')}"
     
     return jsonify({
-        "pdf_name": document_name,
-        "filename": f"{document_name}.pdf",
-        "download_url": download_url,
-        "papermark_url": pdf_url
+        "titre": document_name,
+        "url_telechargement": download_url
     })
 
 @app.route('/download')
