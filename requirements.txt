@@ -2,7 +2,7 @@ flask
 requests
 beautifulsoup4
 gunicorn
-playwright==1.48.0
+playwright
 img2pdf
 pillow
 setuptools
@@ -13,3 +13,4 @@ img2pdf
 pillow
 playwright
 requests
+playwright

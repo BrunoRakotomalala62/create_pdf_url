@@ -76,7 +76,7 @@ def get_pdf_from_papermark(url, email="user@download.com"):
             chromium_path = get_chromium_path()
             launch_args = {
                 'headless': True,
-                'args': ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage']
+                'args': ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', '--headless=new']
             }
             if chromium_path:
                 launch_args['executable_path'] = chromium_path
@@ -258,7 +258,7 @@ def pdf_info():
             chromium_path = get_chromium_path()
             launch_args = {
                 'headless': True,
-                'args': ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage']
+                'args': ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', '--headless=new']
             }
             if chromium_path:
                 launch_args['executable_path'] = chromium_path
