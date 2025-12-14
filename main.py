@@ -214,9 +214,12 @@ def recherche_pdf():
     except FileNotFoundError:
         return jsonify({"error": "Cache file not found"}), 500
     
+    search_words = search_term.lower().split()
+    
     results = []
     for pdf_entry in cache_data.get('pdfs', []):
-        if search_term.lower() in pdf_entry.get('nom', '').lower():
+        nom_lower = pdf_entry.get('nom', '').lower()
+        if any(word in nom_lower for word in search_words):
             url_papermark = pdf_entry.get('url_papermark', '')
             
             from urllib.parse import quote
