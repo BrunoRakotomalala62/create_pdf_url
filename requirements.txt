@@ -6,3 +6,10 @@ playwright==1.48.0
 img2pdf
 pillow
 setuptools
+beautifulsoup4
+flask
+gunicorn
+img2pdf
+pillow
+playwright
+requests
